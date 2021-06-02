@@ -19,7 +19,6 @@ function connectMongo(success,failed) {
   //2.绑定数据库连接的监听
   mongoose.connection.on('open',function (err) {
     if(err){
-        console.log('1');
       console.log('数据库连接失败',err)
       failed('connect failed')
     }else{

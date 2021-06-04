@@ -3,10 +3,11 @@
  */
 //引入Router构造函数
 const {Router}=require('express');
-//创建一个Router实例(路由器就是一个小型的app)
+ //创建一个Router实例(路由器就是一个小型的app)
 let router=new Router()
 //引入模型对象
 let usersModel=require('../model/usersModel')
+
 
 //用于处理用户的注册请求，有很多业务逻辑(校验数据的有效性等) -------- 业务路由
 router.post('/register',(req,res)=>{
@@ -35,15 +36,27 @@ router.post('/register',(req,res)=>{
     //校验密码的正则表达式
     const passwordReg = /^[a-zA-Z0-9_@#.+&]{6,20}$/
 
+    const errMsg={}
     //使用正则去校验
     if(!emailReg.test(email)){
-        res.send('邮箱格式不合法，用户名必须4-20位，主机名必须2-10位')
-    }else if(!nickNameReg.test(nick_name)){
-        res.send('昵称格式不合法，必须为中文')
-    }else if(!passwordReg.test(password)){
-        res.send('密码格式不合法，必须6-20')
-    }else if( password !== re_password){
-        res.send('两次输入密码不一致')
+        // res.send('邮箱格式不合法，用户名必须4-20位，主机名必须2-10位')
+        errMsg.emailErr='邮箱格式不合法，用户名必须4-20位，主机名必须2-10位'
+    }
+    if(!nickNameReg.test(nick_name)){
+        // res.send('昵称格式不合法，必须为中文')
+        errMsg.nickErr='昵称格式不合法，必须为中文'
+    }
+    if(!passwordReg.test(password)){
+        // res.send('密码格式不合法，必须6-20')
+        errMsg.passwordErr='密码格式不合法，必须6-20'
+    }
+    if( password !== re_password){
+        // res.send('两次输入密码不一致')
+        errMsg.rePasswordErr='两次输入密码不一致'
+    }
+    if(JSON.stringify(errMsg)!=='{}'){
+        //若进入此判断,证明用户一定有输入错误的项,重新打回注册页面
+        res.render('register',{errMsg:errMsg})
     }else{
         //去数据库中查询该邮箱是否注册过
         usersModel.findOne({email},function (err,data) {
@@ -69,6 +82,7 @@ router.post('/register',(req,res)=>{
             }
         })
     }
+
 })
 
 //用于处理用户的登录请求，有很多业务逻辑(校验数据的有效性等) -------- 业务路由
@@ -78,10 +92,18 @@ router.post('/login',(req,res)=>{
     //2.准备正则
     const emailReg = /^[a-zA-Z0-9_]{4,20}@[a-zA-Z0-9]{2,10}\.com$/
     const passwordReg = /^[a-zA-Z0-9_@#.+&]{6,20}$/
+    errMsg={}
     if(!emailReg.test(email)){
-        res.send('邮箱格式不合法，用户名必须4-20位，主机名必须2-10位')
-    }else if(!passwordReg.test(password)){
-        res.send('密码格式不合法，必须6-20')
+        // res.send('邮箱格式不合法，用户名必须4-20位，主机名必须2-10位')
+        errMsg.emailErr='邮箱格式不合法，用户名必须4-20位，主机名必须2-10位'
+    }
+    if(!passwordReg.test(password)){
+        // res.send('密码格式不合法，必须6-20')
+        errMsg.passwordErr='密码格式不合法，必须6-20'
+    }
+    if(JSON.stringify(errMsg)!=='{}'){
+        //简写{errMsg:errMsg}==>{errMsg}
+        res.render('login',{errMsg})
     }else{
         //3.去数据库中查找：
         usersModel.findOne({email,password},(err,data)=>{

@@ -6,7 +6,10 @@ const app = express()
 app.disable('x-powered-by')
 //使用内置中间件暴露静态资源，不访问路由直接写文件名+后缀也能看页面
 app.use(express.static(__dirname+'/public'))
-
+//让你的服务器知道你在用哪一个模板引擎-----配置模板引擎
+app.set('view engine','ejs')
+//让你的服务器知道你的模板在哪个目录下，配置模板目录
+app.set('views','./views')
 //引入db模块，用于连接数据库
 const db = require('./db/db')
 //使用内置中间件用于解析post请求的urlencoded参数

@@ -21,7 +21,7 @@ router.get('/login',(req,res)=>{
 //用于展示注册界面的路由，无其他任何逻辑 ----- UI路由
 router.get('/register',(req,res)=>{
     //path.resolve(从哪里出发,查找规则),解决路径问题
-    let url=resolve(__dirname,'../public/login.html')
+    let url=resolve(__dirname,'../public/register.html')
     res.sendFile(url)
 })
 

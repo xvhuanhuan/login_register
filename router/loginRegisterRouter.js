@@ -57,31 +57,34 @@ router.post('/register',(req,res)=>{
     if(JSON.stringify(errMsg)!=='{}'){
         //若进入此判断,证明用户一定有输入错误的项,重新打回注册页面
         res.render('register',{errMsg:errMsg})
-    }else{
-        //去数据库中查询该邮箱是否注册过
-        usersModel.findOne({email},function (err,data) {
-            if(data){
-                //如果注册过
-                //引入计数模块--当达到一个敏感的阈值，触发安全性机制。
-                console.log(`邮箱为${email}的用户注册失败，因为邮箱重复`)
-                res.send('该邮箱已被注册，请更换邮箱')
+        return;
+    }
+    //去数据库中查询该邮箱是否注册过
+    usersModel.findOne({email},function (err,data) {
+        if(data){
+            //如果注册过
+            //引入计数模块--当达到一个敏感的阈值，触发安全性机制。
+            console.log(`邮箱为${email}的用户注册失败，因为邮箱重复`)
+            errMsg.emailErr=`${email}该邮箱已被注册，请更换邮箱`
+            res.render('register',{errMsg})
+            return
+        }
+        //如果没有注册过
+        usersModel.create({email,nick_name,password},function (err) {
+            if(!err){
+                //如果写入成功了
+                console.log(`邮箱为${email}的用户注册成功`)
+                //注册成功了,重定向到登录页面,由于自己有login路由,所以可以直接写'/login'
+                res.redirect(`/login?email=${email}`)
             }else{
-                //如果没有注册过
-                usersModel.create({email,nick_name,password},function (err) {
-                    if(!err){
-                        //如果写入成功了
-                        console.log(`邮箱为${email}的用户注册成功`)
-                        res.send('注册成功了')
-                    }else{
-                        //如果写入失败了
-                        //引入报警模块，当达到敏感阈值，触发报警。
-                        console.log(err)
-                        res.send('您当前的网络状态不稳定，稍后重试')
-                    }
-                })
+                //如果写入失败了
+                //引入报警模块，当达到敏感阈值，触发报警。
+                console.log(err)
+                errMsg.networkErr='您当前的网络状态不稳定，稍后重试'
+                res.render('register',{errMsg})
             }
         })
-    }
+    })
 
 })
 
@@ -92,7 +95,8 @@ router.post('/login',(req,res)=>{
     //2.准备正则
     const emailReg = /^[a-zA-Z0-9_]{4,20}@[a-zA-Z0-9]{2,10}\.com$/
     const passwordReg = /^[a-zA-Z0-9_@#.+&]{6,20}$/
-    errMsg={}
+    //3,准备一个用于收集错误的对象
+    const errMsg={}
     if(!emailReg.test(email)){
         // res.send('邮箱格式不合法，用户名必须4-20位，主机名必须2-10位')
         errMsg.emailErr='邮箱格式不合法，用户名必须4-20位，主机名必须2-10位'
@@ -104,22 +108,24 @@ router.post('/login',(req,res)=>{
     if(JSON.stringify(errMsg)!=='{}'){
         //简写{errMsg:errMsg}==>{errMsg}
         res.render('login',{errMsg})
-    }else{
-        //3.去数据库中查找：
-        usersModel.findOne({email,password},(err,data)=>{
-            if(err){
-                //引入报警模块，当达到敏感阈值，触发报警。
-                console.log(err)
-                res.send('网络不稳定，稍后重试')
-                return
-            }
-            if(data){
-                res.redirect('https://wwww.baidu.com')
-                return
-            }
-            res.send('用户名或密码输入错误！')
-        })
+        return
     }
+    //3.去数据库中查找：
+    usersModel.findOne({email,password},(err,data)=>{
+        if(err){
+            //引入报警模块，当达到敏感阈值，触发报警。
+            console.log(err)
+            errMsg.networkErr='网络不稳定，稍后重试'
+            res.render('login',{errMsg})
+            return
+        }
+        if(data){
+            res.redirect('https://wwww.baidu.com')
+            return
+        }
+        errMsg.loginErr='用户名或密码输入错误！'
+        res.render('login',{errMsg})
+    })
 })
 
 //暴露给server,变成函数是为了符合中间件是函数的思想

@@ -10,7 +10,7 @@
     }
 </style>
 <body>
-
+<span class="err"><%=errMsg.networkErr%></span>
 <form action="http://localhost:3000/register" method="post">
 
     邮箱：<input type="email" name="email" id="email"><span class="err"><%=errMsg.emailErr%></span><br><br>

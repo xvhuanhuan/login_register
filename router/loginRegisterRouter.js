@@ -120,7 +120,9 @@ router.post('/login',(req,res)=>{
             return
         }
         if(data){
-            res.redirect('https://wwww.baidu.com')
+            // res.redirect('https://wwww.baidu.com')
+            // res.render('userCenter',{nickName:data.nick_name})//此种方式会导致浏览器地址栏还是login,因为你只是渲染了页面并没有重定向到其他路由
+            res.redirect(`/user_center?nick_name=${data.nick_name}`)
             return
         }
         errMsg.loginErr='用户名或密码输入错误！'

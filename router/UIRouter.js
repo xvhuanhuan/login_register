@@ -28,6 +28,12 @@ router.get('/register',(req,res)=>{
     res.render('register',{errMsg:{}})
 })
 
+//用于展示个人中心界面的路由，无其他任何逻辑 ----- UI路由
+router.get('/user_center',(req,res)=>{
+    const {nick_name}=req.query
+    res.render('userCenter',{nickName:nick_name})
+})
+
 //暴露给server,变成函数是为了符合中间件是函数的思想
 module.exports=function () {
     return router

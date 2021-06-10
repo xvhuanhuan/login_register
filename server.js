@@ -19,6 +19,17 @@ const UIRouter=require('./router/UIRouter')
 //引入登录注册路由器
 const loginRegisterRouter=require('./router/loginRegisterRouter')
 
+//如下代码是配置express中操作session
+const session=require('express-session');
+
+app.use(session({
+  name: 'peiqi',   //返回给客户端cookie的key，默认值是：connect.sid
+  secret: 'atguigu', //参与加密的字符串（又称签名）
+  cookie: {
+    maxAge: 1000*30 // 设置cookie的过期时间,cookie的key和value,均不在此处配置
+  },
+}));
+
 //逻辑：如果数据库连接成功，随后立即启动服务器，在整个过程中，无论多少次请求，数据库只连接一次。
 db(()=>{
   //路由器中间件

@@ -12,9 +12,6 @@ let router=new Router()
 // let {resolve}=require('path')
 router.use(cookieParser());
 
-
-
-
 //用于展示登录界面的路由，无其他任何逻辑 ----- UI路由
 router.get('/login',(req,res)=>{
     const {email}=req.query
@@ -34,15 +31,18 @@ router.get('/register',(req,res)=>{
 
 //用于展示个人中心界面的路由，无其他任何逻辑 ----- UI路由
 router.get('/user_center',(req,res)=>{
-    const {_id}=req.cookies
-
+    //1,获取客户端通过cookie携带过来的session编号
+    //2,根据session编号匹配session会话存储
+    //3,若匹配上:拿到session会话存储里的数据,去使用
+    //4,若未匹配上:驳回,登录
+    const {_id}=req.session //req携带过来的是cookie:{key:peiqi,value:经过加密的session编号}
     if(_id){
         //去数据库种查找是否有次id
         //查到了--获取该id对应的昵称
-        user.findOne({_id},function (err,data) {
-            if(!err&data){
+        usersModel.findOne({_id},function (err,data) {
+            if(!err&&data){
                 //进入此判断意味着,用户不仅携带id,而且id有效
-                res.render('useCenter',{nickName:data.nick_name})
+                res.render('userCenter',{nickName:data.nick_name})
             }else{
                 //进入此判断意味着:1,与数据库交互的时候产生了错误,2,用户非法篡改了cookie
                 res.redirect('http://localhost:3000/login')
